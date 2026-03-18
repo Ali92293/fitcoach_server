@@ -61,10 +61,12 @@ def get_ai(user_id: str) -> BaakiAI:
 # ══════════════════════════════════════════
 @app.route("/")
 def index():
+    """الصفحة الرئيسية - ترسل ملف HTML"""
     return send_from_directory('static', 'FitCoach_Pro.html')
 
 @app.route("/<path:filename>")
 def static_files(filename):
+    """خدمة جميع الملفات الثابتة"""
     return send_from_directory("static", filename)
 
 # ══════════════════════════════════════════
@@ -119,6 +121,7 @@ def chat():
         print(f"❌ خطأ: {e}")
         return jsonify({"error": str(e)}), 500
 
+
 @app.route("/api/reset", methods=["POST"])
 def reset():
     data    = request.get_json(force=True) or {}
@@ -127,6 +130,7 @@ def reset():
         SESSIONS[user_id]["ai"].reset()
         print(f"🔄 إعادة محادثة: {user_id}")
     return jsonify({"status": "ok"})
+
 
 @app.route("/api/quick-tips", methods=["POST"])
 def quick_tips():
@@ -139,6 +143,7 @@ def quick_tips():
     result = ai.chat("أعطني نصائح يومية سريعة", user_data)
 
     return jsonify({"tips": result["reply"]})
+
 
 @app.route("/api/health", methods=["GET"])
 def health():
