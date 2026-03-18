@@ -57,6 +57,17 @@ def get_ai(user_id: str) -> BaakiAI:
     return SESSIONS[user_id]["ai"]
 
 # ══════════════════════════════════════════
+# تقديم الموقع (Static Files)
+# ══════════════════════════════════════════
+@app.route("/")
+def index():
+    return send_from_directory('static', 'FitCoach_Pro.html')
+
+@app.route("/<path:filename>")
+def static_files(filename):
+    return send_from_directory("static", filename)
+
+# ══════════════════════════════════════════
 # API Routes
 # ══════════════════════════════════════════
 
@@ -101,13 +112,12 @@ def chat():
             "confidence": result["confidence"],
             "turn":       result["turn"],
             "latency_s":  elapsed,
-            "engine":     "baaki-local-v1",  # ← بدون API خارجي
+            "engine":     "baaki-local-v1",
         })
 
     except Exception as e:
         print(f"❌ خطأ: {e}")
         return jsonify({"error": str(e)}), 500
-
 
 @app.route("/api/reset", methods=["POST"])
 def reset():
@@ -117,7 +127,6 @@ def reset():
         SESSIONS[user_id]["ai"].reset()
         print(f"🔄 إعادة محادثة: {user_id}")
     return jsonify({"status": "ok"})
-
 
 @app.route("/api/quick-tips", methods=["POST"])
 def quick_tips():
@@ -131,7 +140,6 @@ def quick_tips():
 
     return jsonify({"tips": result["reply"]})
 
-
 @app.route("/api/health", methods=["GET"])
 def health():
     return jsonify({
@@ -141,22 +149,8 @@ def health():
         "time":     datetime.now().strftime("%H:%M:%S"),
     })
 
-
 # ══════════════════════════════════════════
-# تقديم الموقع (Static Files) - مع التعديل المهم
-# ══════════════════════════════════════════
-@app.route("/")
-def index():
-    # هذا السطر يضمن الوصول للملف سواء على جهازك أو على Vercel
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'FitCoach_Pro.html')
-
-@app.route("/<path:filename>")
-def static_files(filename):
-    return send_from_directory("static", filename)
-
-
-# ══════════════════════════════════════════
-# تشغيل السيرفر
+# تشغيل السيرفر (للتشغيل المحلي فقط)
 # ══════════════════════════════════════════
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
