@@ -57,19 +57,30 @@ def get_ai(user_id: str) -> BaakiAI:
     return SESSIONS[user_id]["ai"]
 
 # ══════════════════════════════════════════
-# تقديم الصفحة الرئيسية
+# الصفحة الرئيسية (الأهم!)
 # ══════════════════════════════════════════
 @app.route("/")
 def index():
-    """إرسال ملف index.html من الجذر"""
+    """الصفحة الرئيسية - تبحث عن ملف HTML في مجلد static"""
     try:
-        return send_from_directory('.', 'index.html')
+        # المسار الصحيح للملف
+        static_dir = os.path.join(app.root_path, 'static')
+        print(f"🔍 البحث عن الملف في: {static_dir}")
+        
+        # التحقق من وجود الملف
+        if os.path.exists(os.path.join(static_dir, 'FitCoach_Pro.html')):
+            print("✅ تم العثور على ملف FitCoach_Pro.html")
+            return send_from_directory(static_dir, 'FitCoach_Pro.html')
+        else:
+            print("❌ لم يتم العثور على الملف!")
+            return "ملف FitCoach_Pro.html غير موجود في مجلد static", 404
     except Exception as e:
+        print(f"❌ خطأ في تحميل الصفحة: {e}")
         return f"خطأ في تحميل الصفحة: {str(e)}", 500
 
 @app.route("/static/<path:filename>")
 def static_files(filename):
-    """خدمة ملفات static"""
+    """خدمة جميع الملفات الثابتة"""
     try:
         return send_from_directory('static', filename)
     except Exception as e:
@@ -83,9 +94,9 @@ def static_files(filename):
 def chat():
     t0 = time.time()
     try:
-        data = request.get_json(force=True) or {}
-        msg = data.get("message", "").strip()
-        user_id = data.get("user_id", "default")
+        data      = request.get_json(force=True) or {}
+        msg       = data.get("message", "").strip()
+        user_id   = data.get("user_id", "default")
         user_data = data.get("user_data", {})
 
         if not msg:
@@ -95,7 +106,7 @@ def chat():
 
         print(f"💬 [{user_id[:8]}] ← {msg[:60]}")
 
-        ai = get_ai(user_id)
+        ai     = get_ai(user_id)
         result = ai.chat(msg, user_data)
         
         # الحصول على الرد من محرك باكي المحلي
@@ -115,49 +126,46 @@ def chat():
         print(f"✅ [{user_id[:8]}] intent={result['intent']} ({elapsed}s)")
 
         return jsonify({
-            "reply": reply,
-            "intent": result["intent"],
+            "reply":      reply,
+            "intent":     result["intent"],
             "confidence": result["confidence"],
-            "turn": result["turn"],
-            "latency_s": elapsed,
-            "engine": "baaki-local-v1",
+            "turn":       result["turn"],
+            "latency_s":  elapsed,
+            "engine":     "baaki-local-v1",
         })
 
     except Exception as e:
         print(f"❌ خطأ: {e}")
         return jsonify({"error": str(e)}), 500
 
-
 @app.route("/api/reset", methods=["POST"])
 def reset():
-    data = request.get_json(force=True) or {}
+    data    = request.get_json(force=True) or {}
     user_id = data.get("user_id", "default")
     if user_id in SESSIONS:
         SESSIONS[user_id]["ai"].reset()
         print(f"🔄 إعادة محادثة: {user_id}")
     return jsonify({"status": "ok"})
 
-
 @app.route("/api/quick-tips", methods=["POST"])
 def quick_tips():
     """نصائح يومية مخصصة بدون API"""
-    data = request.get_json(force=True) or {}
+    data      = request.get_json(force=True) or {}
     user_data = data.get("user_data", {})
-    user_id = data.get("user_id", "default")
+    user_id   = data.get("user_id", "default")
 
-    ai = get_ai(user_id)
+    ai     = get_ai(user_id)
     result = ai.chat("أعطني نصائح يومية سريعة", user_data)
 
     return jsonify({"tips": result["reply"]})
 
-
 @app.route("/api/health", methods=["GET"])
 def health():
     return jsonify({
-        "status": "running 🟢",
-        "engine": "baaki-local-v1 (no external API)",
+        "status":   "running 🟢",
+        "engine":   "baaki-local-v1 (no external API)",
         "sessions": len(SESSIONS),
-        "time": datetime.now().strftime("%H:%M:%S"),
+        "time":     datetime.now().strftime("%H:%M:%S"),
     })
 
 # ══════════════════════════════════════════
@@ -169,9 +177,7 @@ if __name__ == "__main__":
 ╔══════════════════════════════════════════════════╗
 ║    🏋️  FitCoach Pro — باكي AI (جاهز للنشر)  ✅    ║
 ╠══════════════════════════════════════════════════╣
-║  📁 الملفات:                                     ║
-║     - index.html في الجذر                        ║
-║     - static/ مجلد للملفات الثابتة               ║
+║  📁 مجلد static: {os.path.join(app.root_path, 'static')} ║
 ║  🌐 الموقع:   http://0.0.0.0:{port}             ║
 ╚══════════════════════════════════════════════════╝
     """)

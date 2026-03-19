@@ -57,130 +57,213 @@ class IntentClassifier:
     INTENTS = {
         # ── تمارين ──────────────────────────────────────────
         "exercise_chest": {
-            "keywords": ["صدر", "بنش", "ضغط الصدر", "chest", "بوش اب", "ضغط", "بنش برس"],
-            "weight": 1.0
+            "keywords": ["صدر", "بنش", "ضغط الصدر", "chest", "بوش اب", "بنش برس",
+                         "تمرين الصدر", "تمارين الصدر", "عضلة الصدر"],
+            "weight": 1.0,
+            # كلمات يجب ألا تكون موجودة (لمنع التعارض)
+            "blockers": []
         },
         "exercise_back": {
-            "keywords": ["ظهر", "ديدليفت", "عقله", "سحب", "تجديف", "back", "لات", "رو"],
-            "weight": 1.0
+            # ⚠️ إصلاح: "سحب" كانت تتعارض مع "بروتين" — حذفناها
+            # "ظهر" لها blockers لمنع تعارضها مع ألم الظهر
+            "keywords": ["تمارين ظهر", "عضلات الظهر", "ديدليفت", "عقله", "تجديف",
+                         "لات بول", "لات", "back day", "ظهر قوي"],
+            "weight": 1.0,
+            "blockers": ["يوجع", "الم", "وجع", "مريض"]
         },
         "exercise_legs": {
-            "keywords": ["رجل", "ارجل", "سكوات", "قرفصاء", "فخذ", "ركبه", "leg", "squat", "لانج"],
-            "weight": 1.0
+            "keywords": ["ارجل", "تمارين ارجل", "سكوات", "قرفصاء", "فخذ", "leg day",
+                         "squat", "لانج", "leg press", "ضغط الارجل"],
+            "weight": 1.0,
+            "blockers": []
         },
         "exercise_shoulders": {
-            "keywords": ["كتف", "دلتا", "رفع جانبي", "ضغط كتف", "shoulder", "اكتاف"],
-            "weight": 1.0
+            "keywords": ["كتف", "دلتا", "رفع جانبي", "ضغط كتف", "shoulder", "اكتاف",
+                         "تمارين كتف", "عضلة الكتف"],
+            "weight": 1.0,
+            "blockers": ["الم", "وجع"]
         },
         "exercise_arms": {
-            "keywords": ["عضله", "بايسبس", "تراي", "كيرل", "ذراع", "arm", "bicep", "tricep"],
-            "weight": 1.0
+            "keywords": ["بايسبس", "تراي", "كيرل", "bicep", "tricep",
+                         "تمارين ذراع", "عضلة الذراع", "عضلة امامية", "عضلة خلفية"],
+            "weight": 1.0,
+            "blockers": []
         },
         "exercise_core": {
-            "keywords": ["بطن", "كور", "بلانك", "كرنش", "core", "abs", "plank"],
-            "weight": 1.0
+            "keywords": ["بطن", "كور", "بلانك", "كرنش", "core", "abs", "plank",
+                         "تمارين بطن", "عضلات بطن"],
+            "weight": 1.0,
+            "blockers": []
         },
         "exercise_cardio": {
-            "keywords": ["كارديو", "جري", "مشي", "دراجه", "قلب", "تحمل", "cardio", "run", "حرق"],
-            "weight": 1.0
+            "keywords": ["كارديو", "جري", "مشي سريع", "دراجه", "cardio",
+                         "تحمل", "لياقه قلبيه", "هيت", "hiit"],
+            "weight": 1.0,
+            "blockers": []
         },
         "exercise_general": {
-            "keywords": ["تمرين", "تدريب", "برنامج", "روتين", "جدول تمارين", "انواع التمارين"],
-            "weight": 0.8
+            "keywords": ["تمرين", "تدريب", "روتين", "جدول تمارين", "انواع التمارين",
+                         "برنامج تدريبي", "ايش اتمرن", "وش اتمرن"],
+            "weight": 0.8,
+            "blockers": []
         },
 
         # ── تغذية ────────────────────────────────────────────
         "nutrition_protein": {
-            "keywords": ["بروتين", "protein", "دجاج", "بيض", "لحم", "تونه", "مكمل", "واي"],
-            "weight": 1.0
+            # ✅ إصلاح: "بروتين" الآن مع weight=1.5 تكسب على "سحب" في الظهر
+            "keywords": ["بروتين", "protein", "واي بروتين", "whey protein",
+                         "بروتين يومي", "كم بروتين", "مصادر بروتين",
+                         "دجاج", "بيض", "تونه", "لحم مشوي"],
+            "weight": 1.5,   # ← وزن أعلى لمنع التعارض
+            "blockers": []
         },
         "nutrition_calories": {
-            "keywords": ["سعره", "سعرات", "كالوري", "calories", "اكل", "وجبه", "طعام", "حصه"],
-            "weight": 1.0
+            "keywords": ["سعره", "سعرات", "كالوري", "calories",
+                         "كم سعره", "حساب سعرات", "سعرات حراريه"],
+            "weight": 1.0,
+            "blockers": []
         },
         "nutrition_carbs": {
-            "keywords": ["كارب", "كربوهيدرات", "رز", "خبز", "معكرونه", "نشا", "carb"],
-            "weight": 1.0
+            "keywords": ["كارب", "كربوهيدرات", "رز", "خبز", "معكرونه", "carb",
+                         "كم كارب", "اكل الكارب"],
+            "weight": 1.0,
+            "blockers": []
         },
         "nutrition_fats": {
-            "keywords": ["دهون", "زيت", "اوميغا", "fat", "افوكادو", "مكسرات"],
-            "weight": 1.0
+            "keywords": ["دهون صحيه", "دهون جيده", "زيت زيتون", "اوميغا", "افوكادو",
+                         "مكسرات", "healthy fat"],
+            "weight": 1.0,
+            "blockers": []
         },
         "nutrition_water": {
-            "keywords": ["ماي", "ماء", "مياه", "water", "شرب", "ترطيب", "كوب"],
-            "weight": 1.0
+            "keywords": ["ماء", "مياه", "ماي", "water", "شرب الماء",
+                         "كم ماء", "ترطيب", "كوب ماء"],
+            "weight": 1.0,
+            "blockers": []
         },
         "nutrition_meal_plan": {
-            "keywords": ["وجبات", "خطه غذائيه", "نظام غذائي", "اكل صحي", "دايت", "diet"],
-            "weight": 1.0
+            "keywords": ["وجبات", "خطه غذائيه", "نظام غذائي", "اكل صحي",
+                         "دايت", "diet", "خطة اكل", "جدول اكل"],
+            "weight": 1.0,
+            "blockers": []
         },
         "nutrition_supplements": {
-            "keywords": ["مكملات", "كرياتين", "creatine", "واي بروتين", "whey", "بي سي اي"],
-            "weight": 1.0
+            "keywords": ["مكملات", "كرياتين", "creatine", "واي", "whey",
+                         "supplements", "بي سي اي", "bcaa"],
+            "weight": 1.0,
+            "blockers": []
         },
         "nutrition_ramadan": {
-            "keywords": ["رمضان", "صيام", "سحور", "افطار", "صايم", "فطور رمضان"],
-            "weight": 1.2
+            "keywords": ["رمضان", "صيام", "سحور", "افطار", "صايم", "فطور رمضان",
+                         "اكل في رمضان", "تمرين رمضان"],
+            "weight": 1.2,
+            "blockers": []
         },
 
         # ── خسارة وزن / بناء عضلات ──────────────────────────
         "goal_lose_weight": {
-            "keywords": ["خسارة وزن", "تنزيل وزن", "نحافه", "تخسيس", "احرق دهون", "دهون"],
-            "weight": 1.0
+            "keywords": ["خسارة وزن", "تنزيل وزن", "نحافه", "تخسيس",
+                         "احرق دهون", "ابي انحف", "كيف انزل وزني"],
+            "weight": 1.2,
+            "blockers": []
         },
         "goal_gain_muscle": {
-            "keywords": ["بناء عضلات", "ضخامه", "زياده وزن", "كتله", "كبر عضلات"],
-            "weight": 1.0
+            "keywords": ["بناء عضلات", "ضخامه", "زياده وزن", "كتله",
+                         "كبر عضلات", "ابي اتضخم", "كيف ابني عضلات"],
+            "weight": 1.2,
+            "blockers": []
         },
 
         # ── الجسم والصحة ──────────────────────────────────────
         "bmi_calculator": {
-            "keywords": ["bmi", "مؤشر كتله", "وزن مثالي", "وزني كويس", "هل وزني"],
-            "weight": 1.0
+            # ✅ إصلاح: أضفنا patterns أوسع لاكتشاف "وزني X طولي Y"
+            "keywords": ["bmi", "مؤشر كتله", "وزن مثالي", "وزني كويس", "هل وزني",
+                         "احسب وزني", "احسب bmi", "كم وزني المثالي",
+                         "وزني وطولي", "طولي ووزني"],
+            "weight": 1.3,
+            "blockers": []
         },
         "body_pain": {
-            "keywords": ["الم", "وجع", "ايذاء", "اصابه", "مفصل", "ظهر يوجع", "ركبه تعبت"],
-            "weight": 1.1
+            "keywords": ["يوجعني", "عندي الم", "وجع في", "اتالم", "اصابه",
+                         "مفصل يوجع", "ظهر يوجعني", "ركبه تؤلمني",
+                         "كتف مؤلم", "الم مزمن"],
+            "weight": 1.3,
+            "blockers": []
         },
         "sleep_recovery": {
-            "keywords": ["نوم", "راحه", "تعافي", "نعسان", "تعبان", "ارهاق", "sleep"],
-            "weight": 1.0
+            "keywords": ["نوم", "راحه", "تعافي", "نعسان", "ارهاق", "sleep",
+                         "ساعات النوم", "متى انام", "التعافي العضلي",
+                         "انام", "ابي انام", "كم انام", "مشكلة نوم"],
+            "weight": 1.0,
+            "blockers": []
         },
 
         # ── تحفيز ────────────────────────────────────────────
         "motivation": {
-            "keywords": ["محفزني", "تعبت", "ما قادر", "كسلان", "مو مستوي", "ساعدني"],
-            "weight": 1.0
+            "keywords": ["محفزني", "ما قادر", "كسلان", "مو مستوي",
+                         "ابي اكمل", "تعبت من التمرين", "ما عندي رغبه"],
+            "weight": 1.0,
+            "blockers": []
         },
 
         # ── تحيات / عام ──────────────────────────────────────
         "greeting": {
-            "keywords": ["مرحبا", "هلا", "السلام", "اهلا", "كيفك", "صباح", "مساء", "يا باكي"],
-            "weight": 0.9
+            "keywords": ["مرحبا", "هلا", "السلام عليكم", "اهلا", "كيفك",
+                         "صباح الخير", "مساء الخير", "يا باكي", "هاي"],
+            "weight": 0.9,
+            "blockers": []
         },
         "thanks": {
-            "keywords": ["شكرا", "مشكور", "برافو", "ممتاز", "حلو", "thanks"],
-            "weight": 0.7
+            "keywords": ["شكرا", "مشكور", "شكراً جزيلاً", "thanks", "ممنون"],
+            "weight": 0.7,
+            "blockers": []
         },
         "off_topic": {
             "keywords": ["سياسه", "دين", "اخبار", "فلوس", "حب", "علاقه"],
-            "weight": 0.5
+            "weight": 0.5,
+            "blockers": []
         },
     }
 
+    # أنماط regex للـ BMI — تكتشف "وزني 80 طولي 175" مباشرة
+    BMI_PATTERNS = [
+        r"وزن[يه]?\s*\d+.*طول[يه]?\s*\d+",
+        r"طول[يه]?\s*\d+.*وزن[يه]?\s*\d+",
+        r"\d+\s*(?:كغ|كيلو).*\d+\s*(?:سم|متر)",
+        r"\d+\s*(?:سم|متر).*\d+\s*(?:كغ|كيلو)",
+        r"احسب.*(?:وزن|bmi|كتله)",
+    ]
+
     @classmethod
     def classify(cls, text: str) -> tuple[str, float]:
-        """يُرجع (اسم_النية, درجة_الثقة)"""
+        """يُرجع (اسم_النية, درجة_الثقة) بخوارزمية محسّنة"""
         norm = ArabicNormalizer.normalize(text)
         scores: dict[str, float] = {}
 
+        # فحص أنماط BMI أولاً (أولوية عالية)
+        for pat in cls.BMI_PATTERNS:
+            if re.search(pat, norm):
+                return "bmi_calculator", 0.95
+
         for intent, data in cls.INTENTS.items():
             score = 0.0
+            blocked = False
+
+            # فحص الـ blockers أولاً
+            for blocker in data.get("blockers", []):
+                if ArabicNormalizer.normalize(blocker) in norm:
+                    blocked = True
+                    break
+            if blocked:
+                continue
+
             for kw in data["keywords"]:
                 kw_norm = ArabicNormalizer.normalize(kw)
                 if kw_norm in norm:
-                    # كلمة أطول = وزن أكبر
-                    score += len(kw_norm.split()) * data["weight"]
+                    # كلمة متعددة (عبارة) تأخذ وزناً مضاعفاً
+                    word_count = len(kw_norm.split())
+                    score += word_count * word_count * data["weight"]
+
             if score > 0:
                 scores[intent] = score
 
@@ -188,10 +271,9 @@ class IntentClassifier:
             return "unknown", 0.0
 
         best = max(scores, key=scores.get)
-        # تطبيع الدرجة بين 0 و 1
-        max_possible = max(len(kw.split()) for kw in cls.INTENTS[best]["keywords"]) * 3
-        confidence = min(scores[best] / max_possible, 1.0)
-        return best, confidence
+        total = sum(scores.values())
+        confidence = round(scores[best] / total, 2) if total > 0 else 0.0
+        return best, min(confidence, 1.0)
 
 
 # ══════════════════════════════════════════════════════════════
